@@ -1,34 +1,27 @@
 import sys
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QMainWindow
-from PyQt5.QtCore import Qt
+
+import sqlite3
 from PyQt5 import uic
-from PyQt5.QtGui import QPainter, QColor
-import random
+from PyQt5.QtWidgets import QMainWindow, QApplication, QButtonGroup, QPushButton, QTableWidgetItem
 
 
 class Example(QMainWindow):
     def __init__(self):
         super(Example, self).__init__()
-        uic.loadUi('SQL2.ui', self)
-        self.flag = False
+        uic.loadUi('untitled.ui', self)
+        self.con = sqlite3.connect("coffee.sqlite")
 
-        self.btn.clicked.connect(self.run)
+        self.cur = self.con.cursor()
+        self.result = self.cur.execute("SELECT * FROM COFFEE").fetchall()
 
-    def run(self):
-        self.flag = True
-        self.update()
 
-    def paintEvent(self, event):
-        if self.flag:
-            self.qp = QPainter()
-            self.qp.begin(self)
-            self.draw()
-            self.qp.end()
-
-    def draw(self):
-        self.qp.setBrush(QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
-        c = random.randint(10, 100)
-        self.qp.drawEllipse(*[random.randint(10, 700), random.randint(10, 500)], c, c)
+        self.tableWidget.setRowCount(len(self.result))
+        self.tableWidget.setColumnCount(len(self.result[0]))
+        self.tableWidget.setHorizontalHeaderLabels(['ID', 'название сорта', 'степень обжарки', 'молотый/в зернах',
+                                                    'описание вкуса', 'цена', 'объем упаковки'])
+        for i, elem in enumerate(self.result):
+            for j, val in enumerate(elem):
+                self.tableWidget.setItem(i, j, QTableWidgetItem(str(val)))
 
 
 if __name__ == '__main__':
